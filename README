@@ -1,0 +1,149 @@
+############################ LOGGING ##############################
+#    Make plots, calculcate avarage time etc of your functions.   #
+###################################################################
+
+1. 	ADD THE LOGGING PROJECT TO YOUR PROJECT
+	
+	Store the "Logging-folder" as a subfolder of your project root 
+	directory, where the Makefile is located.
+
+	Make a copy of the containg cmp_copy.plot file to the subfolder
+	"logs". Modifiy it with your data:
+		1. xlabel: Typically what work have been done. Ex:
+			"Avarage hashing time spent, string length"
+		2. ylabel: Typically a time axis. Ex:
+			"Time (microseconds)"
+		3. Modify the three last lines to match each of your log-files
+			* 	Location of the logfile (typically you only need to
+				change the filename, if you havent modified anything)
+			* 	Description of the actual logtime: What is logged?
+
+2.	THE MAKE FILE:
+
+	Add the following to your Makefile to create graphical presentation
+	of log easily.
+
+	compare:
+		gnuplot ./Logging/logs/cmp.plot
+		ps2pdf ./Logging/logs/compare.ps ./Logging/logs/compare.pdf
+		evince ./Logging/logs/compare.pdf
+
+	comparecln:
+		rm -f ./Logging/logs/*.data
+		rm -f ./Logging/logs/*.ps
+		rm -f ./Logging/logs/*.pdf
+
+	Note: comparecln does not delete the .plot file in your directory,
+	since it take time to get it right. Delete it manually if needed.
+
+3.	REQUIREMENTS: 	
+
+	Ensure you have gnuplot, evince and ps2pdf installed. 
+	* On linux:
+		$ sudo apt-get install gnuplot evince ps2pdf
+
+4.	HOW TO IMPLEMENT LOGGING TO YOUR PROJECT
+
+	4.1 Include the the logging project in your c-file:
+
+		#include Logging/log.c
+
+	4.2 Create a log-file:
+	
+		logfile_t *log = logfile_create( "filename" );
+
+		Where "log" is your further reference and "filename"
+		is the unique filename for the logs to be stored in.
+		
+		Ensure that you create additional logfiles if you're
+		measuring additional processes.
+
+	4.3 Logging a process:
+
+		Start adding a log entry with:
+			log_entry_start( log );
+		where "log" is your reference to the logfile.
+		
+		End an entry with:
+			log_entry_end( log, idx, entries );
+		where idx is the log entry index, and entries is the number
+		of iterations (used when calculating avarage time spent).
+
+		Its important that the code betweens these two function-
+		calls is the related to what you want to messure. If your
+		comparing one implementation with another, you need to
+		ensure that the code do the same work on each meassurement,
+		except for the particullary algorithm.
+
+	4.4 Print avarage time spent:
+
+		logfile_avg( log );
+
+	4.5 Destroy log, free up memory.
+
+		This does not delete the actual logfile, only free up memory
+		used by the logging-project.
+
+		logfile_destroy( log );
+
+	4.6 OPEN TERMINAL AND BUILD PROJECT:
+
+		Make your project (memember options if needed)
+		$ make
+		
+		Run your project
+		$ <run file>
+
+		Make a comparison (see step 2)
+		$ make compare
+
+		Remove logs
+		$ make comparecln
+
+		Note: If you didnt add the compare section from step 2 
+		to your Makefile you can run them one by one from the 
+		terminal.
+
+5. 	EXAMPLE OF USE
+
+	Now we're gonna log two diffent implementations of two hashing
+	algorithms (note; this is psuedo-code, so hash1 and hash2
+	function does probably not exists).
+
+	#include "Logging/log.c"
+
+	// Create logfiles
+	logfile_t *log1 = logfile_create( "hash1" );
+	logfile_t *log2 = logfile_create( "hash2" );
+
+	# Used withing loop
+	int i, x;
+	char *str_tohash = "This is a string";
+
+	// Loop from 0 to string lenght to measure 
+	// processing time on different string lenght
+	for ( i = 0; i < strlen( str_tohash ); i++ ) {
+
+		// Start logging this
+		log_entry_start( log1 );
+		// Loop 50 times to get an average time
+		for( x = 0; x < 50; x++ ) 
+			hash1( str_tohash, strlen( str_tohash ) );
+		// End log entry "i" with a timespent/number of hashings
+		log_entry_end( log1, i, x );
+
+		// Same applies.
+		log_entry_start( log1 );
+		for( x = 0; x < 50; x++ )
+			hash2( str_tohash, strlen( str_tohash ) );
+		log_entry_end( log1, i, x );
+
+	}
+
+	// Print avarage time during the whole process
+	logfile_avg( log1 );
+	logfile_avg( log2 );
+
+	// Destroy logfile.
+	logfile_destroy( log1 );
+	logfile_destroy( log2 );
