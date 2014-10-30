@@ -76,7 +76,7 @@ logfile_t *logfile_create( char *logfile_name ) {
 /**
  * Start measuring: Create a log entry
  **/
-unsigned long long log_entry_start( logfile_t *logfile ) {
+void log_entry_start( logfile_t *logfile ) {
 	
 	logfile->t1 = gettime();
 

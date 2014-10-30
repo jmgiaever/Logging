@@ -12,7 +12,7 @@ typedef struct logfile {
 } logfile_t;
 
 logfile_t *logfile_create( char *logfile_name );
-unsigned long long log_entry_start( logfile_t *logfile );
+void log_entry_start( logfile_t *logfile );
 void log_entry_end( logfile_t *logfile, int idx, int entries );
 void logfile_avg( logfile_t *logfile );
 void logfile_destroy( logfile_t *logfile );
