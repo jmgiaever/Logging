@@ -51,7 +51,7 @@ static void fatal_error( char *error_msg ) {
 /**
  * Create a log file.
  **/
-logfile_t *logfile_create( char *logfile_name ) {
+logfile_t *logfile_create( char *logfile_name, logtype_t type ) {
 
 	char buf[1024];
 
@@ -62,6 +62,7 @@ logfile_t *logfile_create( char *logfile_name ) {
 
 	snprintf(buf, sizeof buf, "Logging/logs/%s.data", logfile_name );
 	logfile->filename = strdup( buf );
+	logfile->type = type;
 
 	logfile_open( logfile, "w" );
 
@@ -76,23 +77,66 @@ logfile_t *logfile_create( char *logfile_name ) {
 /**
  * Start measuring: Create a log entry
  **/
-void log_entry_start( logfile_t *logfile ) {
+void log_entry_start( logfile_t *logfile, ... ) {
 	
-	logfile->t1 = gettime();
+	va_list args;
+	int num;
+
+	switch( logfile->type ) {
+		case MICROTIMER: logfile->t1 = gettime(); break;
+		case NUMERIC: 
+
+			va_start( args, logfile );
+			num = va_arg( args, int );
+
+			/*if ( num == 0 )
+				fatal_error( "Num cant be null" );*/
+
+			logfile->t1 = num;
+			va_end( args );
+
+			break;
+
+		default: fatal_error( "Uknown type." );
+
+	}
 
 }
 
 /**
  * End measuring: End a log entry
  **/
-void log_entry_end( logfile_t *logfile, int idx, int entries ) {
+void log_entry_end( logfile_t *logfile, int idx, int entries, ... ) {
 
+	va_list args;
 	int result;
+	int num;
 
-	if ( logfile->t1 == 0.0 )
-		fatal_error( "You must start an log entry before ending it." );
+	switch( logfile->type ) {
+		case MICROTIMER: 
+			
+			if ( logfile->t1 == 0.0 )
+				fatal_error( "You must start an log entry before ending it." );	
 
-	logfile->t2 = gettime();
+			logfile->t2 = gettime(); 
+
+			break;
+		case NUMERIC: 
+
+			va_start( args, entries );
+			num = va_arg( args, int );
+
+			/*if ( num == 0 )
+				fatal_error( "Num cant be null" );*/
+
+			logfile->t2 = num;
+			va_end( args );
+
+			break;
+
+		default: fatal_error( "Uknown type." );
+
+	}
 
 	if ( entries <= 0 )
 		entries = 1;

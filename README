@@ -24,9 +24,10 @@
 	of log easily.
 
 	compare:
-		gnuplot ./Logging/logs/cmp.plot
-		ps2pdf ./Logging/logs/compare.ps ./Logging/logs/compare.pdf
-		evince ./Logging/logs/compare.pdf
+		gnuplot ./Logging/logs/$(plot).plot
+		ps2pdf ./Logging/logs/compare.ps ./Logging/logs/$(plot).pdf
+		evince ./Logging/logs/$(plot).pdf
+		rm ./Logging/logs/compare.ps
 
 	comparecln:
 		rm -f ./Logging/logs/*.data
