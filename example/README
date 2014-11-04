@@ -1,0 +1,10 @@
+HOW TO TEST:
+
+$ make
+$ ./main
+$ make plot=cmp_algorithms compare
+
+TO CLEAN UP:
+
+$ make comparecln
+$ make clean
