@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <stdarg.h>
 
-typedef enum logtype { SECTIMER, MICROTIMER, NUMERIC} logtype_t;
+typedef enum logtype { MICROTIMER, NUMERIC} logtype_t;
 
 typedef struct logfile {
 	FILE 	*f;
